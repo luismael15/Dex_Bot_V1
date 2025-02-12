@@ -1,19 +1,43 @@
-import { JsonRpcProvider } from "ethers";
+import { ethers } from "ethers";
 
 // Connect to the Ethereum network
-const provider = new JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM"); //Change Netwrok URL because it's been disclosed
+const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM"); //Change Netwrok URL because it's been disclosed
 
-// DEX contract address and Swap event signature
-//const dexAddress = "0x6fF5693b99212Da76ad316178A184AB56D299b43"; // Uniswap V4:Universal router
+// Swap event signature
 const swapEventSignature = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"; // Swap topic
 
 // Create a filter for swap events
 const filter = {
-  //
   topics: [swapEventSignature]
 };
 
-// Get logs
-const logs = await provider.getLogs(filter);
+// Function to parse hex data to decimal values
+function parseSwapLog(log) {
+  const data = log.data.substring(2); // Remove '0x'
+  const decoded = {
+    amount0: ethers.toBigInt("0x" + data.substring(0, 64)).toString(),
+    amount1: ethers.toBigInt("0x" + data.substring(64, 128)).toString(),
+    sqrtPriceX96: ethers.toBigInt("0x" + data.substring(128, 192)).toString(),
+    liquidity: ethers.toBigInt("0x" + data.substring(192, 256)).toString(),
+    tick: ethers.toBigInt("0x" + data.substring(256, 320)).toString(),
+  };
+  return decoded;
+}
 
-console.log(logs);
+// Fetch logs and decode them
+async function fetchAndDecodeLogs() {
+  try {
+    const logs = await provider.getLogs(filter);
+    const parsedLogs = logs.map(log => ({
+      transactionHash: log.transactionHash,
+      blockNumber: log.blockNumber,
+      parsedData: parseSwapLog(log),
+    }));
+
+    console.log(parsedLogs);
+  } catch (error) {
+    console.error("Error fetching logs:", error);
+  }
+}
+
+fetchAndDecodeLogs();

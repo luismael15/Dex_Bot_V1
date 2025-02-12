@@ -1,6 +1,6 @@
 {
+  "type": "module",
   "dependencies": {
-    "ethers": "^6.13.5",
-    "websocket": "^1.0.35"
+    "ethers": "^6.13.5"
   }
 }
