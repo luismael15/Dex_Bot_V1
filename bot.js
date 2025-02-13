@@ -5,11 +5,13 @@ const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/
 
 // Swap event signature
 const swapEventSignature = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"; // Swap topic
+//Swap pool Address
+const swapAddress = "0x021235b92A4F52C789F43a1B01453c237C265861"; // Swap address
 
 // Create a filter for swap events
 const filter = {
-  topics: [swapEventSignature],
-  address: '0x021235b92A4F52C789F43a1B01453c237C265861'
+  address: [swapAddress],
+  topics: [swapEventSignature]
 };
 
 // Function to convert hex data to signed integers
