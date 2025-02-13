@@ -1,27 +1,41 @@
 import { ethers } from "ethers";
 
 // Connect to the Ethereum network
-const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM"); //Change Netwrok URL because it's been disclosed
+const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM"); // Replace with your actual key
 
 // Swap event signature
 const swapEventSignature = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"; // Swap topic
 
 // Create a filter for swap events
 const filter = {
-  topics: [swapEventSignature]
+  topics: [swapEventSignature],
+  address: '0x021235b92A4F52C789F43a1B01453c237C265861'
 };
+
+// Function to convert hex data to signed integers
+function toSignedInt(hex, bitSize) {
+  let value = ethers.toBigInt(hex);
+  const maxUnsigned = BigInt(2) ** BigInt(bitSize);  // Max value for the given bit size
+  const maxSigned = maxUnsigned / BigInt(2); // Max positive signed value
+
+  // If value is greater than or equal to maxSigned, it means it's negative
+  if (value >= maxSigned) {
+    value -= maxUnsigned;
+  }
+  return value.toString();
+}
 
 // Function to parse hex data to decimal values
 function parseSwapLog(log) {
   const data = log.data.substring(2); // Remove '0x'
-  const decoded = {
-    amount0: ethers.toBigInt("0x" + data.substring(0, 64)).toString(),
-    amount1: ethers.toBigInt("0x" + data.substring(64, 128)).toString(),
-    sqrtPriceX96: ethers.toBigInt("0x" + data.substring(128, 192)).toString(),
-    liquidity: ethers.toBigInt("0x" + data.substring(192, 256)).toString(),
-    tick: ethers.toBigInt("0x" + data.substring(256, 320)).toString(),
+
+  return {
+    amount0: toSignedInt("0x" + data.substring(0, 64), 256), // Signed 256-bit
+    amount1: toSignedInt("0x" + data.substring(64, 128), 256), // Signed 256-bit
+    sqrtPriceX96: ethers.toBigInt("0x" + data.substring(128, 192)).toString(), // Always positive
+    liquidity: ethers.toBigInt("0x" + data.substring(192, 256)).toString(), // Always positive
+    tick: toSignedInt("0x" + data.substring(256, 320), 256), // ✅ FIXED: Signed 32-bit
   };
-  return decoded;
 }
 
 // Fetch logs and decode them
