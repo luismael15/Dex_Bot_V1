@@ -10,15 +10,15 @@ const ERC20_ABI = [
     "function decimals() view returns (uint8)"
   ];
   
-  // Uniswap V3 pool ABI (only relevant functions)
-  const UNISWAP_V3_POOL_ABI = [
+  // Pool ABI (only relevant functions)
+  const POOL_ABI = [
     "function token0() view returns (address)",
     "function token1() view returns (address)"
   ];
   
   async function fetchPoolTokens(poolAddress) {
     try {
-      const poolContract = new ethers.Contract(poolAddress, UNISWAP_V3_POOL_ABI, provider);
+      const poolContract = new ethers.Contract(poolAddress, POOL_ABI, provider);
       
       const token0Address = await poolContract.token0();
       const token1Address = await poolContract.token1();
@@ -42,5 +42,5 @@ const ERC20_ABI = [
   }
   
   // Example usage
-  const poolAddress = "0x021235b92A4F52C789F43a1B01453c237C265861"; // Replace with an actual pool address
+  const poolAddress = config.USDC_cbBTC_Aerodrome_Pool; // Replace with an actual pool address on .env file
   fetchPoolTokens(poolAddress);
