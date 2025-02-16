@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
+import { config } from './config.js';
 
 // Connect to the Ethereum network
-const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM");
+const provider = new ethers.JsonRpcProvider(config.Network_URL); // Set Network in the .env file
 
 // ERC20 token ABI (only relevant functions)
 const ERC20_ABI = [

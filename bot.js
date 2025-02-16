@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
+import { config } from './config.js';
 
-// Connect to the Ethereum network
-const provider = new ethers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM"); // Replace with your actual key
+// Connect to the network
+const provider = new ethers.JsonRpcProvider(config.Network_URL); // Set Network in the .env file
 
 // Swap event signature
 const swapEventSignature = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"; // Swap topic

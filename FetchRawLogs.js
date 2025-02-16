@@ -1,7 +1,8 @@
 import { JsonRpcProvider } from "ethers";
+import { config } from './config.js';
 
 // Connect to the Ethereum network
-const provider = new JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/dKvu8kSJ1J1s60as-F3PfFr2cp6MAUCM");
+const provider = new JsonRpcProvider(config.Network_URL); // Set Network in the .env file
 
 // Get logs
 const filter = {};
