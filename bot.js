@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { config } from './config.js';
+import { fetchPoolTokens } from './FetchPoolTokens.js'; // Import FetchPoolTokens
 
 // Connect to the network using WebSocketProvider
 const provider = new ethers.WebSocketProvider(config.Network_URL_Websocket);
@@ -13,7 +14,6 @@ function toSignedInt(hex, bitSize) {
     let value = ethers.toBigInt(hex);
     const maxUnsigned = BigInt(2) ** BigInt(bitSize); // Max value for the given bit size
     const maxSigned = maxUnsigned / BigInt(2); // Max positive signed value
-
     if (value >= maxSigned) {
         value -= maxUnsigned;
     }
@@ -37,6 +37,9 @@ async function subscribeToSwapEvents() {
     try {
         console.log(`Subscribing to Swap events on pool: ${swapAddress}`);
 
+        // Fetch token details
+        const { token0, token1 } = await fetchPoolTokens(swapAddress);
+
         provider.on({
             address: swapAddress,
             topics: [EventSignature]
@@ -45,6 +48,17 @@ async function subscribeToSwapEvents() {
             const parsedLog = parseSwapLog(log);
             console.log("Parsed Log:", parsedLog);
             console.log("Transaction Hash:", log.transactionHash);
+
+            //Display Amount with Decimals
+            const amount0 = ethers.formatUnits(parsedLog.amount0, token0.decimals);
+            const amount1 = ethers.formatUnits(parsedLog.amount1, token1.decimals);
+
+            console.log(`Amount0 (${token0.symbol}): ${amount0}`);
+            console.log(`Amount1 (${token1.symbol}): ${amount1}`);
+
+            //Include Block Number
+            console.log(`Block Number: ${log.blockNumber}`);
+
             // **IMPORTANT:** Trigger your arbitrage logic here, using the parsedLog data
             // Example:
             // analyzeSwapAndExecute(parsedLog);
@@ -58,7 +72,7 @@ async function subscribeToSwapEvents() {
 
 // Function to handle WebSocket connection and setup
 async function connectWebSocket() {
-    provider.websocket.on("open", () => {  // Changed to provider.websocket.on
+    provider.websocket.on("open", () => { // Changed to provider.websocket.on
         console.log("WebSocket connection established!");
         subscribeToSwapEvents(); // Call the subscription function *after* open
     });
@@ -69,7 +83,7 @@ async function connectWebSocket() {
         setTimeout(connectWebSocket, 5000); // Reconnect after 5 seconds
     });
 
-    provider.websocket.on("error", (error) => {  // Changed to provider.websocket.on
+    provider.websocket.on("error", (error) => { // Changed to provider.websocket.on
         console.error("WebSocket error:", error);
     });
 }
