@@ -5,10 +5,6 @@ import { fetchPoolTokens } from './FetchPoolTokens.js'; // Import FetchPoolToken
 // Connect to the network using WebSocketProvider
 const provider = new ethers.WebSocketProvider(config.Network_URL_Websocket);
 
-// Swap event signature and pool address from config
-const EventSignature = config.SwapEventSignature;
-const swapAddress = config.ETH_USDC_Uniswap_V3_Pool;
-
 // Function to convert hex data to signed integers
 function toSignedInt(hex, bitSize) {
     let value = ethers.toBigInt(hex);
@@ -32,17 +28,17 @@ function parseSwapLog(log) {
     };
 }
 
-// Function to subscribe to swap events (called *after* the connection is open)
-async function subscribeToSwapEvents() {
+// Function to subscribe to swap events for a specific pool
+async function subscribeToSwapEvents(pool) {
     try {
-        console.log(`Subscribing to Swap events on pool: ${swapAddress}`);
+        console.log(`Subscribing to Swap events on pool: ${pool.name}`);
 
         // Fetch token details
-        const { token0, token1 } = await fetchPoolTokens(swapAddress);
+        const { token0, token1 } = await fetchPoolTokens(pool.address);
 
         provider.on({
-            address: swapAddress,
-            topics: [EventSignature]
+            address: pool.address,
+            topics: [pool.SwapEventSignature] // Use the SwapEventSignature from pool
         }, (log) => {
             console.log("New Swap Event:");
             const parsedLog = parseSwapLog(log);
@@ -52,12 +48,14 @@ async function subscribeToSwapEvents() {
             //Display Amount with Decimals
             const amount0 = ethers.formatUnits(parsedLog.amount0, token0.decimals);
             const amount1 = ethers.formatUnits(parsedLog.amount1, token1.decimals);
-
             console.log(`Amount0 (${token0.symbol}): ${amount0}`);
             console.log(`Amount1 (${token1.symbol}): ${amount1}`);
 
             //Include Block Number
             console.log(`Block Number: ${log.blockNumber}`);
+
+            //Include Pool Name
+            console.log(`Pool Name: ${pool.name}`);
 
             // **IMPORTANT:** Trigger your arbitrage logic here, using the parsedLog data
             // Example:
@@ -74,7 +72,10 @@ async function subscribeToSwapEvents() {
 async function connectWebSocket() {
     provider.websocket.on("open", () => { // Changed to provider.websocket.on
         console.log("WebSocket connection established!");
-        subscribeToSwapEvents(); // Call the subscription function *after* open
+        // Subscribe to each pool in the config
+        config.pools.forEach(pool => {
+            subscribeToSwapEvents(pool);
+        });
     });
 
     provider.websocket.on("close", (code, reason) => { // Changed to provider.websocket.on
