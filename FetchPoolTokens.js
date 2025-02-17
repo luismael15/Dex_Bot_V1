@@ -42,5 +42,5 @@ const ERC20_ABI = [
   }
   
   // Example usage
-  const poolAddress = config.USDC_cbBTC_Aerodrome_Pool; // Replace with an actual pool address on .env file
+  const poolAddress = config.ETH_USDC_Aerodrome_Pool; // Replace with an actual pool address on .env file
   fetchPoolTokens(poolAddress);
