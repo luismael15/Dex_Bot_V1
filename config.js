@@ -6,5 +6,6 @@ export const config = {
   ZBU_USDC_Base_Uniswap_Pool: process.env.ZBU_USDC_Base_Uniswap_Pool,
   USDC_cbBTC_Aerodrome_Pool: process.env.USDC_cbBTC_Aerodrome_Pool,
   USDC_cbBTC_Uniswap_V3_Pool: process.env.USDC_cbBTC_Uniswap_V3_Pool,
+  SwapEventSignature: process.env.SwapEventSignature,
 };
 

@@ -4,15 +4,15 @@ import { config } from './config.js';
 // Connect to the network
 const provider = new ethers.JsonRpcProvider(config.Network_URL); // Set Network in the .env file
 
-// Swap event signature
-const swapEventSignature = "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67"; // Swap topic
+// Swap event signature, topic to filter logs
+const EventSignature = config.SwapEventSignature; // Swap topic
 //Swap pool Address
-const swapAddress = "0x021235b92A4F52C789F43a1B01453c237C265861"; // Swap address
+const swapAddress = config.USDC_cbBTC_Aerodrome_Pool; // Swap address
 
 // Create a filter for swap events
 const filter = {
   address: [swapAddress],
-  topics: [swapEventSignature]
+  topics: [EventSignature]
 };
 
 // Function to convert hex data to signed integers
