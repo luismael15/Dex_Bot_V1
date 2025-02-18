@@ -32,36 +32,22 @@ function parseSwapLog(log) {
 async function subscribeToSwapEvents(pool) {
     try {
         console.log(`Subscribing to Swap events on pool: ${pool.name}`);
-
         // Fetch token details
         const { token0, token1 } = await fetchPoolTokens(pool.address);
-
         provider.on({
             address: pool.address,
             topics: [pool.SwapEventSignature] // Use the SwapEventSignature from pool
         }, (log) => {
-            console.log("New Swap Event:");
             const parsedLog = parseSwapLog(log);
-            console.log("Parsed Log:", parsedLog);
-            console.log("Transaction Hash:", log.transactionHash);
-
-            //Display Amount with Decimals
             const amount0 = ethers.formatUnits(parsedLog.amount0, token0.decimals);
             const amount1 = ethers.formatUnits(parsedLog.amount1, token1.decimals);
-            console.log(`Amount0 (${token0.symbol}): ${amount0}`);
-            console.log(`Amount1 (${token1.symbol}): ${amount1}`);
 
-            //Include Block Number
-            console.log(`Block Number: ${log.blockNumber}`);
+            // Calculate the price of token1/token0 in absolute numbers
+            const price = Math.abs(parseFloat(amount1) / parseFloat(amount0));
 
-            //Include Pool Name
-            console.log(`Pool Name: ${pool.name}`);
-
-            // **IMPORTANT:** Trigger your arbitrage logic here, using the parsedLog data
-            // Example:
-            // analyzeSwapAndExecute(parsedLog);
+            console.log(`New Swap Event on pool: ${pool.name}`);
+            console.log(`Price (${token1.symbol}/${token0.symbol}): ${price}`);
         });
-
         console.log("Successfully subscribed to swap events.");
     } catch (error) {
         console.error("Error subscribing to events:", error);
@@ -77,13 +63,11 @@ async function connectWebSocket() {
             subscribeToSwapEvents(pool);
         });
     });
-
     provider.websocket.on("close", (code, reason) => { // Changed to provider.websocket.on
         console.log(`WebSocket connection closed: code=${code}, reason=${reason}`);
         console.log("Attempting to reconnect in 5 seconds...");
         setTimeout(connectWebSocket, 5000); // Reconnect after 5 seconds
     });
-
     provider.websocket.on("error", (error) => { // Changed to provider.websocket.on
         console.error("WebSocket error:", error);
     });
