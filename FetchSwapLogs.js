@@ -45,8 +45,11 @@ async function subscribeToSwapEvents(pool) {
             // Calculate the price of token1/token0 in absolute numbers
             const price = Math.abs(parseFloat(amount1) / parseFloat(amount0));
 
+            console.log(`------------------------`);
             console.log(`New Swap Event on pool: ${pool.name}`);
             console.log(`Price (${token1.symbol}/${token0.symbol}): ${price}`);
+            console.log(`Block Number: ${log.blockNumber}`);
+            console.log(`Transaction Hash: ${log.transactionHash}`);
         });
         console.log("Successfully subscribed to swap events.");
     } catch (error) {
